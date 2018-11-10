@@ -3,19 +3,15 @@ package com.cyberschnitzel.phonear
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.Toast
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
-import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
-import com.google.ar.sceneform.ux.TransformableNode
 
 /**
  * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
@@ -40,20 +36,7 @@ class HelloSceneformActivity : AppCompatActivity() {
 
         // When you build a Renderable, Sceneform loads its resources in the background while returning
         // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-        ModelRenderable.builder()
-                .setSource(this, Uri.parse("Phone_01.sfb"))
-                .build()
-                .thenAccept { model ->
-                    phone = Phone(applicationContext, arFragment!!.transformationSystem,
-                            PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
-                            model) }
-                .exceptionally { throwable ->
-                    Log.d(TAG, throwable.localizedMessage)
-                    val toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG)
-                    toast.setGravity(Gravity.CENTER, 0, 0)
-                    toast.show()
-                    return@exceptionally null
-                }
+        phone = Phone(applicationContext, arFragment!!.transformationSystem, PhoneData("samsung_note_9", Size(70.9f, 143.6f, 7.7f)))
 
         arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, _: MotionEvent ->
             if (phone == null) {
@@ -68,6 +51,8 @@ class HelloSceneformActivity : AppCompatActivity() {
             // Create the transformable andy and add it to the anchor.
             phone!!.setParent(anchorNode)
             phone!!.select()
+
+            Toast.makeText(this, hitResult.distance.toString(), Toast.LENGTH_LONG).show()
         }
     }
 
