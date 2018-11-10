@@ -40,15 +40,16 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             menu = Node()
             menu.setParent(this)
             menu.isEnabled = false
-            val offset = phoneData.size.h * INFO_CARD_Y_POS_COEFF + 1.0f
-            menu.localPosition = Vector3(0.0f, offset, 0.0f)
+            val dimension = phoneData.size.h * INFO_CARD_Y_POS_COEFF + 1.0f
+            menu.localPosition = Vector3(0.0f, dimension, 0.0f)
+            menu.localScale = Vector3(dimension, dimension, dimension)
 
             ViewRenderable.builder()
                     .setView(context, R.layout.menu_phone_tap)
                     .build()
                     .thenAccept { renderable ->
                         menu.renderable = renderable
-                        val view = renderable.view
+                        val view = renderable.view  // Get the menu view
                         val phoneName = view.findViewById(R.id.phone_name) as TextView
                         phoneName.text = phoneData.phoneName
                     }
