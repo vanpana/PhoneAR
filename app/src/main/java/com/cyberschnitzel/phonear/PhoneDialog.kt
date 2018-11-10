@@ -22,7 +22,7 @@ import com.google.ar.sceneform.ux.TransformationSystem
 class PhoneDialog(context: Context, transformationSystem: TransformationSystem) :
         TransformableNode(transformationSystem), InputChangedTrigger {
 
-    lateinit var inputRenderable: ViewRenderable
+    private lateinit var inputRenderable: ViewRenderable
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
     lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
@@ -66,13 +66,16 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
 
     private val onShowPhoneClickListener = View.OnClickListener {
         if (phoneNameInput.text.toString() != "") {
+            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(parentPhoneNameInput.windowToken, 0)
+
             // Find the phone and build it
             ModelRenderable.builder()
                     .setSource(context, Uri.parse("Phone_01.sfb"))
                     .build()
                     .thenAccept { model ->
                         val phone = Phone(context, transformationSystem,
-                                PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
+                                PhoneData("Google", Size(20.0f, 154.0f, 7.4f),
+                                        "android", "snapdragon", "12mp"),
                                 model)
                         phoneSelectedTrigger.onPhoneSelected(phone)
                     }

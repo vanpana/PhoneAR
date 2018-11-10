@@ -22,9 +22,6 @@ import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_ux.*
 
-/**
- * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
- */
 class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
     private var arFragment: ArFragment? = null
     private var phoneDialog: PhoneDialog? = null
@@ -63,8 +60,6 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
                 }
 
             }
-
-
         }
     }
 
@@ -107,7 +102,7 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
 
             // Make phone dialog disappear
             phoneDialog!!.setParent(null)
-            phoneDialog = null
+            phoneDialog = null // TODO don't make null maybe
         } else if (secondPhone == null) {
             secondPhone = phone
 

@@ -4,26 +4,31 @@
     android:layout_height="match_parent"
     android:orientation="vertical">
 
-    <TextView xmlns:android="http://schemas.android.com/apk/res/android"
-        android:id="@+id/phone_name"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:gravity="center"
-        android:orientation="vertical"
-        android:padding="6dp"
-        android:text="Test"
-        android:textColor="@android:color/white"
-        android:textAlignment="center" />
-
     <Button
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="click me"/>
-
-    <EditText
-        android:id="@+id/phone_name_input"
+        android:id="@+id/compare"
         android:layout_width="match_parent"
         android:layout_height="40dp"
-        android:hint="Phone name"/>
+        android:text="Compare"
+        android:background="@drawable/btn_rounded"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/specs"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Specs"
+        android:background="@drawable/btn_rounded"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp"/>
+
+    <Button
+        android:id="@+id/hands_mode"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="Hands Mode"
+        android:background="@drawable/btn_rounded"
+        android:textColor="@android:color/white"
+        android:layout_marginBottom="8dp"/>
+
 </LinearLayout>
