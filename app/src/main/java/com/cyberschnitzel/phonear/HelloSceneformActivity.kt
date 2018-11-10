@@ -3,6 +3,7 @@ package com.cyberschnitzel.phonear
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
+import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.util.Log
@@ -39,7 +40,7 @@ class HelloSceneformActivity : AppCompatActivity() {
         // When you build a Renderable, Sceneform loads its resources in the background while returning
         // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
         ModelRenderable.builder()
-                .setSource(this, R.raw.andy)
+                .setSource(this, Uri.parse("Phone_01.sfb"))
                 .build()
                 .thenAccept { model -> andyModel = model }
                 .exceptionally { throwable ->
@@ -64,6 +65,8 @@ class HelloSceneformActivity : AppCompatActivity() {
             val andy = TransformableNode(arFragment!!.transformationSystem)
             andy.setParent(anchorNode)
             andy.renderable = andyModel
+            andy.scaleController.minScale = 0.01f
+            andy.scaleController.maxScale = 0.05f
             andy.select()
         }
     }
