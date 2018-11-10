@@ -26,7 +26,7 @@ class HelloSceneformActivity : AppCompatActivity() {
 
     private var arFragment: ArFragment? = null
 
-    private var phone: Phone? = null
+    private var phoneDialog: PhoneDialog? = null
 
     override// CompletableFuture requires api level 24
     // FutureReturnValueIgnored is not valid
@@ -40,28 +40,12 @@ class HelloSceneformActivity : AppCompatActivity() {
         setContentView(R.layout.activity_ux)
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
 
-        // When you build a Renderable, Sceneform loads its resources in the background while returning
-        // a CompletableFuture. Call thenAccept(), handle(), or check isDone() before calling get().
-        ModelRenderable.builder()
-                .setSource(this, Uri.parse("Phone_01.sfb"))
-                .build()
-                .thenAccept { model ->
-                    phone = Phone(applicationContext, arFragment!!.transformationSystem,
-                            PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
-                            model)
-                    phone!!.parentPhoneNameInput = phone_name_input
-                    phone_name_input.addTextChangedListener(PhoneInputWatcher())
-                }
-                .exceptionally { throwable ->
-                    Log.d(TAG, throwable.localizedMessage)
-                    val toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG)
-                    toast.setGravity(Gravity.CENTER, 0, 0)
-                    toast.show()
-                    return@exceptionally null
-                }
+        phoneDialog = PhoneDialog(applicationContext, arFragment!!.transformationSystem)
+        phoneDialog!!.parentPhoneNameInput = phone_name_input
+        phone_name_input.addTextChangedListener(PhoneInputWatcher())
 
         arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, _: MotionEvent ->
-            if (phone == null) {
+            if (phoneDialog == null) {
                 return@setOnTapArPlaneListener
             }
 
@@ -71,8 +55,8 @@ class HelloSceneformActivity : AppCompatActivity() {
             anchorNode.setParent(arFragment!!.arSceneView.scene)
 
             // Create the transformable andy and add it to the anchor.
-            phone!!.setParent(anchorNode)
-            phone!!.select()
+            phoneDialog!!.setParent(anchorNode)
+            phoneDialog!!.select()
         }
     }
 
@@ -103,7 +87,7 @@ class HelloSceneformActivity : AppCompatActivity() {
         }
 
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
-            phone!!.updateText(p0.toString())
+            phoneDialog!!.updateText(p0.toString())
         }
 
     }

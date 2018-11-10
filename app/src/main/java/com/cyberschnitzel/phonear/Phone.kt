@@ -79,7 +79,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     }
 
     override fun onUpdate(p0: FrameTime?) {
-        if (!::menu.isInitialized && menu.isEnabled) {
+        if (!::menu.isInitialized || !menu.isEnabled) {
             return
         }
 
