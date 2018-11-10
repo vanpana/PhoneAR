@@ -121,6 +121,17 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             phoneDialog!!.updateText(p0.toString())
         }
+    }
 
+    override fun onBackPressed() {
+        var toSuper = true
+        if (firstPhone != null) {
+            toSuper = firstPhone!!.onBackPressed()
+        }
+        if (secondPhone != null) {
+            toSuper = secondPhone!!.onBackPressed() && toSuper
+        }
+
+        if (toSuper) super.onBackPressed()
     }
 }

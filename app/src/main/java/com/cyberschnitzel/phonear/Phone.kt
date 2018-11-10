@@ -22,6 +22,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     : TransformableNode(transformationSystem), Node.OnTapListener {
 
     private lateinit var phoneActionsPopup: Node
+    private var canGoBack: Boolean = false
 
     companion object {
         private const val INFO_CARD_Y_POS_COEFF = 0.06f
@@ -89,6 +90,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             val handsModeButton = view.findViewById(R.id.hands_mode) as Button
             handsModeButton.setOnClickListener(handsModeButtonClick)
         })
+        canGoBack = false
     }
 
     private fun initSpecsPopup() {
@@ -108,6 +110,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             val camera = view.findViewById(R.id.camera) as TextView
             camera.text = phoneData.camera
         })
+        canGoBack = true
     }
 
     override fun onTap(p0: HitTestResult?, p1: MotionEvent?) {
@@ -132,5 +135,14 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         val direction = Vector3.subtract(cameraPosition, cardPosition)
         val lookRotation = Quaternion.lookRotation(direction, Vector3.up())
         phoneActionsPopup.worldRotation = lookRotation
+    }
+
+    fun onBackPressed(): Boolean {
+        return if (canGoBack) {
+            initMenuPopup()
+            false
+        } else {
+            true
+        }
     }
 }
