@@ -6,6 +6,8 @@ import android.content.Context
 import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
+import android.text.Editable
+import android.text.TextWatcher
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
@@ -15,7 +17,7 @@ import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
-import com.google.ar.sceneform.ux.TransformableNode
+import kotlinx.android.synthetic.main.activity_ux.*
 
 /**
  * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
@@ -46,7 +48,10 @@ class HelloSceneformActivity : AppCompatActivity() {
                 .thenAccept { model ->
                     phone = Phone(applicationContext, arFragment!!.transformationSystem,
                             PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
-                            model) }
+                            model)
+                    phone!!.parentPhoneNameInput = phone_name_input
+                    phone_name_input.addTextChangedListener(PhoneInputWatcher())
+                }
                 .exceptionally { throwable ->
                     Log.d(TAG, throwable.localizedMessage)
                     val toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG)
@@ -87,5 +92,19 @@ class HelloSceneformActivity : AppCompatActivity() {
             }
             return true
         }
+    }
+
+    inner class PhoneInputWatcher : TextWatcher {
+        override fun afterTextChanged(p0: Editable?) {
+
+        }
+
+        override fun beforeTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+        }
+
+        override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
+            phone!!.updateText(p0.toString())
+        }
+
     }
 }

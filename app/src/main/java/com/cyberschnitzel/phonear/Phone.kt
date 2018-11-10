@@ -1,7 +1,10 @@
 package com.cyberschnitzel.phonear
 
 import android.content.Context
+import android.support.v4.content.ContextCompat.getSystemService
 import android.view.MotionEvent
+import android.view.inputmethod.InputMethodManager
+import android.widget.EditText
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.rendering.ModelRenderable
@@ -15,10 +18,11 @@ import com.google.ar.sceneform.ux.TransformationSystem
 
 class Phone(private val context: Context, transformationSystem: TransformationSystem,
             val phoneData: PhoneData, phoneRenderable: ModelRenderable)
-    : TransformableNode(transformationSystem), Node.OnTapListener {
+    : TransformableNode(transformationSystem), Node.OnTapListener, InputChangedTrigger {
 
     private lateinit var menu: Node
-
+    lateinit var parentPhoneNameInput: EditText
+    lateinit var input: EditText
     companion object {
         private const val INFO_CARD_Y_POS_COEFF = 0.06f
     }
@@ -52,6 +56,13 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                         val view = renderable.view  // Get the menu view
                         val phoneName = view.findViewById(R.id.phone_name) as TextView
                         phoneName.text = phoneData.phoneName
+
+                        input  = view.findViewById(R.id.phone_name_input) as EditText
+                        input.setOnClickListener {
+                            parentPhoneNameInput.isFocusableInTouchMode = true
+                            parentPhoneNameInput.requestFocusFromTouch()
+                            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(parentPhoneNameInput, 0)
+                        }
                     }
                     .exceptionally { throwable ->
                         throw AssertionError("Could not load plane card view.", throwable)
@@ -81,5 +92,9 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         val direction = Vector3.subtract(cameraPosition, cardPosition)
         val lookRotation = Quaternion.lookRotation(direction, Vector3.up())
         menu.worldRotation = lookRotation
+    }
+
+    override fun updateText(text: String) {
+        input.setText(text)
     }
 }

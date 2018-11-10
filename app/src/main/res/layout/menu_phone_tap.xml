@@ -21,4 +21,9 @@
         android:layout_height="wrap_content"
         android:text="click me"/>
 
+    <EditText
+        android:id="@+id/phone_name_input"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:hint="Phone name"/>
 </LinearLayout>
