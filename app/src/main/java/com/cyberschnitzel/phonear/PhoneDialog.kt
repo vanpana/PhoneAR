@@ -3,6 +3,9 @@ package com.cyberschnitzel.phonear
 import android.content.ContentValues.TAG
 import android.content.Context
 import android.net.Uri
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
+import android.transition.TransitionManager
 import android.util.Log
 import android.view.Gravity
 import android.view.View
@@ -19,16 +22,22 @@ import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ScaleController
 import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
+import android.view.ViewGroup
+
+
 
 class PhoneDialog(context: Context, transformationSystem: TransformationSystem) :
         TransformableNode(transformationSystem), InputChangedTrigger {
+
+    private var transitionsContainer: ViewGroup? = null
 
     lateinit var inputRenderable: ViewRenderable
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
     private var phoneAdapter: AutoCompletePhoneAdapter? = null
-    private var suggestionList: List<PhoneData> = mutableListOf()
     lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
+    var suggestionListRecyclerView: RecyclerView? = null
+
 
     init {
         fillSugestionsList()
@@ -40,19 +49,22 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
 
                     val view = renderable.view  // Get the view
 
+                    transitionsContainer = view.findViewById(R.id.dialog_layout)
+
                     // Set the edit text
-                    phoneNameInput = view.findViewById(R.id.phone_name_input) as EditText
+                    phoneNameInput = transitionsContainer!!.findViewById(R.id.phone_name_input) as EditText
                     phoneNameInput.setOnClickListener(phoneNameInputClickListener)
 
                     // Set the button
-                    val actionButton = view.findViewById(R.id.action_button) as Button
+                    val actionButton = transitionsContainer!!.findViewById(R.id.action_button) as Button
                     actionButton.setOnClickListener(onShowPhoneClickListener)
 
                     // TODO delete this dummy
-//                    val suggestionList = view.findViewById(R.id.suggestion_list) as RecyclerView
-//                    suggestionList.layoutManager = LinearLayoutManager(context)
-//                    phoneAdapter = AutoCompletePhoneAdapter(this.suggestionList, context)
-//                    suggestionList.adapter = phoneAdapter
+                    suggestionListRecyclerView = transitionsContainer!!.findViewById(R.id.suggestion_list) as RecyclerView
+                    suggestionListRecyclerView!!.layoutManager = LinearLayoutManager(context)
+                    phoneAdapter = AutoCompletePhoneAdapter(fillSugestionsList(), context)
+                    suggestionListRecyclerView!!.adapter = phoneAdapter
+                    suggestionListRecyclerView!!.visibility = View.GONE
 
                     // Set the Node rendarable
                     this.renderable = inputRenderable
@@ -61,8 +73,9 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     throw AssertionError("Could not load plane card view.", throwable)
                 }
 
-        scaleController.minScale = ScaleController.DEFAULT_MIN_SCALE
-        scaleController.maxScale = ScaleController.DEFAULT_MAX_SCALE
+        scaleController.minScale = 0.2f
+        scaleController.maxScale = 0.3f
+        translationController.isEnabled = false
 
 
     }
@@ -124,8 +137,8 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     }
 
 
-    fun fillSugestionsList() = {
-        this.suggestionList = listOf(
+    fun fillSugestionsList(): List<PhoneData> {
+        return listOf(
                 PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
                 PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
                 PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
@@ -134,5 +147,14 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                 PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
                 PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp")
         )
+    }
+
+    fun updateSuggestions(items: List<PhoneData>) {
+        if (suggestionListRecyclerView!!.visibility == View.GONE) {
+            TransitionManager.beginDelayedTransition(transitionsContainer)
+            suggestionListRecyclerView!!.visibility = View.VISIBLE
+        }
+
+        phoneAdapter!!.updateItems(items)
     }
 }

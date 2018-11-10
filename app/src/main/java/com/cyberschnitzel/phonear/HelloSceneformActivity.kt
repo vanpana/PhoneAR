@@ -118,6 +118,9 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
 
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             phoneDialog!!.updateText(p0.toString())
+
+            // TODO Make server request
+            phoneDialog!!.updateSuggestions(phoneDialog!!.fillSugestionsList())
         }
     }
 

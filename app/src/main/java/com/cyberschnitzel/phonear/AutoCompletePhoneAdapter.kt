@@ -8,7 +8,7 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 
-class AutoCompletePhoneAdapter(val items : List<PhoneData>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+class AutoCompletePhoneAdapter(var items : List<PhoneData>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.phone_autocomplete_item, parent, false))
@@ -25,6 +25,10 @@ class AutoCompletePhoneAdapter(val items : List<PhoneData>, val context: Context
         return items.size
     }
 
+    fun updateItems(new_items: List<PhoneData>) {
+        items = new_items
+        notifyDataSetChanged()
+    }
 }
 
 class ViewHolder (view: View) : RecyclerView.ViewHolder(view) {
