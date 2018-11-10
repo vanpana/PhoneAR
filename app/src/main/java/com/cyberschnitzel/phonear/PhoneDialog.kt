@@ -2,8 +2,6 @@ package com.cyberschnitzel.phonear
 
 import android.content.ContentValues.TAG
 import android.content.Context
-import android.support.v7.widget.LinearLayoutManager
-import android.support.v7.widget.RecyclerView
 import android.net.Uri
 import android.util.Log
 import android.view.Gravity
@@ -16,6 +14,7 @@ import android.widget.Toast
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
+import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ScaleController
 import com.google.ar.sceneform.ux.TransformableNode
@@ -50,10 +49,10 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     actionButton.setOnClickListener(onShowPhoneClickListener)
 
                     // TODO delete this dummy
-                    val suggestionList = view.findViewById(R.id.suggestion_list) as RecyclerView
-                    suggestionList.layoutManager = LinearLayoutManager(context)
-                    phoneAdapter = AutoCompletePhoneAdapter(this.suggestionList, context)
-                    suggestionList.adapter = phoneAdapter
+//                    val suggestionList = view.findViewById(R.id.suggestion_list) as RecyclerView
+//                    suggestionList.layoutManager = LinearLayoutManager(context)
+//                    phoneAdapter = AutoCompletePhoneAdapter(this.suggestionList, context)
+//                    suggestionList.adapter = phoneAdapter
 
                     // Set the Node rendarable
                     this.renderable = inputRenderable
@@ -127,16 +126,13 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
 
     fun fillSugestionsList() = {
         this.suggestionList = listOf(
-                PhoneData("Iphone X", Size(1f, 2f, 3f)),
-                PhoneData("Samsung S9", Size(2f, 3f, 4f)),
-                PhoneData("Samsung S3", Size(2f, 3f, 4f)),
-                PhoneData("Samsung S6", Size(2f, 3f, 4f)),
-                PhoneData("Samsung S7", Size(2f, 3f, 4f)),
-                PhoneData("Oneplus 6", Size(2f, 3f, 4f)),
-                PhoneData("Lenovo A1", Size(2f, 3f, 4f)),
-                PhoneData("Blueberry Privo", Size(2f, 3f, 4f)),
-                PhoneData("Samsung A3", Size(2f, 3f, 4f)),
-                PhoneData("Iphone 6", Size(3f, 4f, 5f))
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
+                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp")
         )
     }
 }
