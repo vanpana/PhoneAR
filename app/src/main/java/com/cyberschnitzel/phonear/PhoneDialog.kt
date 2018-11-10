@@ -1,15 +1,17 @@
 package com.cyberschnitzel.phonear
 
 import android.content.Context
+import android.support.v7.widget.LinearLayoutManager
+import android.support.v7.widget.RecyclerView
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
 import android.widget.EditText
 import android.widget.Toast
+
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
-import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.ViewRenderable
 import com.google.ar.sceneform.ux.ScaleController
 import com.google.ar.sceneform.ux.TransformableNode
@@ -21,8 +23,12 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     lateinit var inputRenderable: ViewRenderable
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
+    private var phoneAdapter: AutoCompletePhoneAdapter? = null
+
+    private var suggestionList: List<PhoneData> = mutableListOf()
 
     init {
+        fillSugestionsList()
         ViewRenderable.builder()
                 .setView(context, R.layout.dialog_phone_searcher)
                 .build()
@@ -39,6 +45,12 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     val actionButton = view.findViewById(R.id.action_button) as Button
                     actionButton.setOnClickListener(onShowPhoneClickListener)
 
+                    // TODO delete this dummy
+                    val suggestionList = view.findViewById(R.id.suggestion_list) as RecyclerView
+                    suggestionList.layoutManager = LinearLayoutManager(context)
+                    phoneAdapter = AutoCompletePhoneAdapter(this.suggestionList, context)
+                    suggestionList.adapter = phoneAdapter
+
                     // Set the Node rendarable
                     this.renderable = inputRenderable
                 }
@@ -48,6 +60,8 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
 
         scaleController.minScale = ScaleController.DEFAULT_MIN_SCALE
         scaleController.maxScale = ScaleController.DEFAULT_MAX_SCALE
+
+
     }
 
     private val phoneNameInputClickListener = View.OnClickListener {
@@ -81,5 +95,21 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
         val direction = Vector3.subtract(cameraPosition, cardPosition)
         val lookRotation = Quaternion.lookRotation(direction, Vector3.up())
         worldRotation = lookRotation
+    }
+
+
+    fun fillSugestionsList() = {
+        this.suggestionList = listOf(
+                PhoneData("Iphone X", Size(1f, 2f, 3f)),
+                PhoneData("Samsung S9", Size(2f, 3f, 4f)),
+                PhoneData("Samsung S3", Size(2f, 3f, 4f)),
+                PhoneData("Samsung S6", Size(2f, 3f, 4f)),
+                PhoneData("Samsung S7", Size(2f, 3f, 4f)),
+                PhoneData("Oneplus 6", Size(2f, 3f, 4f)),
+                PhoneData("Lenovo A1", Size(2f, 3f, 4f)),
+                PhoneData("Blueberry Privo", Size(2f, 3f, 4f)),
+                PhoneData("Samsung A3", Size(2f, 3f, 4f)),
+                PhoneData("Iphone 6", Size(3f, 4f, 5f))
+        )
     }
 }
