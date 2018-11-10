@@ -3,30 +3,28 @@ package com.cyberschnitzel.phonear
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.Toast
+import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
+import com.google.ar.sceneform.ux.TransformableNode
 import kotlinx.android.synthetic.main.activity_ux.*
 
-/**
- * This is an example activity that uses the Sceneform UX package to make common AR tasks easier.
- */
-class HelloSceneformActivity : AppCompatActivity() {
-
+class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
     private var arFragment: ArFragment? = null
-
     private var phoneDialog: PhoneDialog? = null
+    private var firstPhone: Phone? = null // Main phone
+    private var secondPhone: Phone? = null // Comparable phone
 
     override// CompletableFuture requires api level 24
     // FutureReturnValueIgnored is not valid
@@ -42,6 +40,7 @@ class HelloSceneformActivity : AppCompatActivity() {
 
         phoneDialog = PhoneDialog(applicationContext, arFragment!!.transformationSystem)
         phoneDialog!!.parentPhoneNameInput = phone_name_input
+        phoneDialog!!.phoneSelectedTrigger = this
         phone_name_input.addTextChangedListener(PhoneInputWatcher())
 
         arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, _: MotionEvent ->
@@ -49,14 +48,15 @@ class HelloSceneformActivity : AppCompatActivity() {
                 return@setOnTapArPlaneListener
             }
 
-            // Create the Anchor.
-            val anchor = hitResult.createAnchor()
-            val anchorNode = AnchorNode(anchor)
-            anchorNode.setParent(arFragment!!.arSceneView.scene)
-
-            // Create the transformable andy and add it to the anchor.
-            phoneDialog!!.setParent(anchorNode)
-            phoneDialog!!.select()
+            if (firstPhone == null) { // Show phone dialog
+                attachNodeToAnchor(phoneDialog!!, createAnchor(hitResult))
+            } else { // Show phones
+                if (secondPhone != null) { // Show second phone
+                    // Create the Anchor.
+                    phoneDialog = null
+                    attachNodeToAnchor(secondPhone!!, createAnchor(hitResult))
+                }
+            }
         }
     }
 
@@ -78,6 +78,36 @@ class HelloSceneformActivity : AppCompatActivity() {
         }
     }
 
+    private fun createAnchor(hitResult: HitResult): AnchorNode {
+        val anchor = hitResult.createAnchor()
+        val anchorNode = AnchorNode(anchor)
+        anchorNode.setParent(arFragment!!.arSceneView.scene)
+        return anchorNode
+    }
+
+    private fun attachNodeToAnchor(node: TransformableNode, anchorNode: Node) {
+        node.setParent(anchorNode)
+        node.select()
+    }
+
+    override fun onPhoneSelected(phone: Phone) {
+        if (firstPhone == null) {
+            firstPhone = phone
+            firstPhone!!.phoneDialog = phoneDialog
+
+            // Set firstPhone anchor to phone dialog one
+            attachNodeToAnchor(firstPhone!!, phoneDialog!!.parent)
+
+            // Make phone dialog disappear
+            phoneDialog!!.setParent(null)
+            // phoneDialog = null // TODO don't make null maybe
+        } else if (secondPhone == null) {
+            secondPhone = phone
+
+            //TODO Make sure the menu doesn't show comparable
+        }
+    }
+
     inner class PhoneInputWatcher : TextWatcher {
         override fun afterTextChanged(p0: Editable?) {
 
@@ -89,7 +119,18 @@ class HelloSceneformActivity : AppCompatActivity() {
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             phoneDialog!!.updateText(p0.toString())
         }
+    }
 
+    override fun onBackPressed() {
+        var toSuper = true
+        if (firstPhone != null) {
+            toSuper = firstPhone!!.onBackPressed()
+        }
+        if (secondPhone != null) {
+            toSuper = secondPhone!!.onBackPressed() && toSuper
+        }
+
+        if (toSuper) super.onBackPressed()
     }
 
 }

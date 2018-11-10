@@ -2,7 +2,8 @@ package com.cyberschnitzel.phonear
 
 class Size(val w: Float, val h: Float, val d: Float)
 
-class PhoneData(val phoneName: String, val size: Size) {
+class PhoneData(val phoneName: String, val size: Size, val os: String, val cpu: String,
+                val camera: String) {
     companion object {
         private const val MAX_SCALE_COEFF = 3080
         private const val MIN_SCALE_COEFF = 10000

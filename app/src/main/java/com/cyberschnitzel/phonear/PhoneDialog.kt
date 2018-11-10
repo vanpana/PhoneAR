@@ -1,8 +1,12 @@
 package com.cyberschnitzel.phonear
 
+import android.content.ContentValues.TAG
 import android.content.Context
 import android.support.v7.widget.LinearLayoutManager
 import android.support.v7.widget.RecyclerView
+import android.net.Uri
+import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -24,8 +28,8 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
     private var phoneAdapter: AutoCompletePhoneAdapter? = null
-
     private var suggestionList: List<PhoneData> = mutableListOf()
+    lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
 
     init {
         fillSugestionsList()
@@ -74,7 +78,30 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     }
 
     private val onShowPhoneClickListener = View.OnClickListener {
-        Toast.makeText(context, "SHOW MY PHONE ALREADY", Toast.LENGTH_LONG).show()
+        if (phoneNameInput.text.toString() != "") {
+            (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(parentPhoneNameInput.windowToken, 0)
+
+            // Find the phone and build it
+            ModelRenderable.builder()
+                    .setSource(context, Uri.parse("Phone_01.sfb"))
+                    .build()
+                    .thenAccept { model ->
+                        val phone = Phone(context, transformationSystem,
+                                PhoneData("samsung_note_9", Size(70.0f, 143.0f, 7.7f),
+                                        "android", "snapdragon", "12mp"),
+                                model)
+                        phoneSelectedTrigger.onPhoneSelected(phone)
+                        phoneNameInput.setText("")
+                    }
+                    .exceptionally { throwable ->
+                        Log.d(TAG, throwable.localizedMessage)
+                        val toast = Toast.makeText(context, "Unable to load andy renderable", Toast.LENGTH_LONG)
+                        toast.setGravity(Gravity.CENTER, 0, 0)
+                        toast.show()
+                        return@exceptionally null
+                    }
+        }
+
     }
 
     override fun updateText(text: String) {
