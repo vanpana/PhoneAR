@@ -33,7 +33,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         renderable = phoneRenderable
 
         scaleController.minScale = phoneData.minScale
-        scaleController.maxScale = phoneData.maxScale
+        scaleController.maxScale = phoneData.minScale + 0.01f
     }
 
     override fun onActivate() {

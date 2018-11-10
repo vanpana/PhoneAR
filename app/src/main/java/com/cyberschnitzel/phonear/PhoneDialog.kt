@@ -1,6 +1,10 @@
 package com.cyberschnitzel.phonear
 
+import android.content.ContentValues.TAG
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import android.view.Gravity
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.Button
@@ -21,6 +25,7 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     lateinit var inputRenderable: ViewRenderable
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
+    lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
 
     init {
         ViewRenderable.builder()
@@ -60,7 +65,26 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     }
 
     private val onShowPhoneClickListener = View.OnClickListener {
-        Toast.makeText(context, "SHOW MY PHONE ALREADY", Toast.LENGTH_LONG).show()
+        if (phoneNameInput.text.toString() != "") {
+            // Find the phone and build it
+            ModelRenderable.builder()
+                    .setSource(context, Uri.parse("Phone_01.sfb"))
+                    .build()
+                    .thenAccept { model ->
+                        val phone = Phone(context, transformationSystem,
+                                PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
+                                model)
+                        phoneSelectedTrigger.onPhoneSelected(phone)
+                    }
+                    .exceptionally { throwable ->
+                        Log.d(TAG, throwable.localizedMessage)
+                        val toast = Toast.makeText(context, "Unable to load andy renderable", Toast.LENGTH_LONG)
+                        toast.setGravity(Gravity.CENTER, 0, 0)
+                        toast.show()
+                        return@exceptionally null
+                    }
+        }
+
     }
 
     override fun updateText(text: String) {
