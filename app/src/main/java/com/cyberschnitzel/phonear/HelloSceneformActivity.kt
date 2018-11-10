@@ -96,13 +96,14 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
     override fun onPhoneSelected(phone: Phone) {
         if (firstPhone == null) {
             firstPhone = phone
+            firstPhone!!.phoneDialog = phoneDialog
 
             // Set firstPhone anchor to phone dialog one
             attachNodeToAnchor(firstPhone!!, phoneDialog!!.parent)
 
             // Make phone dialog disappear
             phoneDialog!!.setParent(null)
-            phoneDialog = null // TODO don't make null maybe
+            // phoneDialog = null // TODO don't make null maybe
         } else if (secondPhone == null) {
             secondPhone = phone
 

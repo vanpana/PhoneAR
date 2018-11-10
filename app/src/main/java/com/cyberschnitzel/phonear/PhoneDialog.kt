@@ -22,7 +22,7 @@ import com.google.ar.sceneform.ux.TransformationSystem
 class PhoneDialog(context: Context, transformationSystem: TransformationSystem) :
         TransformableNode(transformationSystem), InputChangedTrigger {
 
-    private lateinit var inputRenderable: ViewRenderable
+    lateinit var inputRenderable: ViewRenderable
     lateinit var parentPhoneNameInput: EditText
     private lateinit var phoneNameInput: EditText
     lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
@@ -78,6 +78,7 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                                         "android", "snapdragon", "12mp"),
                                 model)
                         phoneSelectedTrigger.onPhoneSelected(phone)
+                        phoneNameInput.setText("")
                     }
                     .exceptionally { throwable ->
                         Log.d(TAG, throwable.localizedMessage)

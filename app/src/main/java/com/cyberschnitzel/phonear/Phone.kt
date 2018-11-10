@@ -23,6 +23,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
 
     private lateinit var phoneActionsPopup: Node
     private var canGoBack: Boolean = false
+    var phoneDialog: PhoneDialog? = null
 
     companion object {
         private const val INFO_CARD_Y_POS_COEFF = 0.06f
@@ -50,7 +51,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     }
 
     private val compareButtonClick = View.OnClickListener {
-
+        initComparePopup()
     }
 
     private val specsButtonClick = View.OnClickListener {
@@ -91,6 +92,13 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             handsModeButton.setOnClickListener(handsModeButtonClick)
         })
         canGoBack = false
+    }
+
+    private fun initComparePopup() {
+        if (phoneDialog != null) {
+            phoneActionsPopup.renderable = phoneDialog!!.inputRenderable
+            canGoBack = true
+        }
     }
 
     private fun initSpecsPopup() {
