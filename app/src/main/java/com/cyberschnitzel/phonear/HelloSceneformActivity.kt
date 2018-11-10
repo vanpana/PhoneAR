@@ -23,7 +23,8 @@ import com.google.ar.sceneform.ux.TransformableNode
 class HelloSceneformActivity : AppCompatActivity() {
 
     private var arFragment: ArFragment? = null
-    private var andyModel: ModelRenderable? = null
+
+    private var phone: Phone? = null
 
     override// CompletableFuture requires api level 24
     // FutureReturnValueIgnored is not valid
@@ -42,7 +43,10 @@ class HelloSceneformActivity : AppCompatActivity() {
         ModelRenderable.builder()
                 .setSource(this, Uri.parse("Phone_01.sfb"))
                 .build()
-                .thenAccept { model -> andyModel = model }
+                .thenAccept { model ->
+                    phone = Phone(applicationContext, arFragment!!.transformationSystem,
+                            PhoneData("Google", Size(20.0f, 154.0f, 7.4f)),
+                            model) }
                 .exceptionally { throwable ->
                     Log.d(TAG, throwable.localizedMessage)
                     val toast = Toast.makeText(this, "Unable to load andy renderable", Toast.LENGTH_LONG)
@@ -52,7 +56,7 @@ class HelloSceneformActivity : AppCompatActivity() {
                 }
 
         arFragment!!.setOnTapArPlaneListener { hitResult: HitResult, plane: Plane, _: MotionEvent ->
-            if (andyModel == null) {
+            if (phone == null) {
                 return@setOnTapArPlaneListener
             }
 
@@ -62,12 +66,8 @@ class HelloSceneformActivity : AppCompatActivity() {
             anchorNode.setParent(arFragment!!.arSceneView.scene)
 
             // Create the transformable andy and add it to the anchor.
-            val andy = TransformableNode(arFragment!!.transformationSystem)
-            andy.setParent(anchorNode)
-            andy.renderable = andyModel
-            andy.scaleController.minScale = 0.01f
-            andy.scaleController.maxScale = 0.05f
-            andy.select()
+            phone!!.setParent(anchorNode)
+            phone!!.select()
         }
     }
 
