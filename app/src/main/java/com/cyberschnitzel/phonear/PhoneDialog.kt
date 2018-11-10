@@ -74,7 +74,7 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     .build()
                     .thenAccept { model ->
                         val phone = Phone(context, transformationSystem,
-                                PhoneData("Google", Size(20.0f, 154.0f, 7.4f),
+                                PhoneData("samsung_note_9", Size(70.0f, 143.0f, 7.7f),
                                         "android", "snapdragon", "12mp"),
                                 model)
                         phoneSelectedTrigger.onPhoneSelected(phone)

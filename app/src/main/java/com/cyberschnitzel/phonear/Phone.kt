@@ -5,16 +5,12 @@ import android.view.MotionEvent
 import android.widget.TextView
 import android.view.View
 import android.widget.Button
-import android.widget.TextView
-import com.google.ar.sceneform.HitTestResult
-import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
-import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
 import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.TransformableNode
@@ -48,8 +44,8 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         setOnTapListener(this)
 
 //        worldPosition = Vector3.add(worldPosition, up.scaled(phoneData.size.h * SIZE_SCALE / 2))
-        MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.RED)).thenAccept {
-            val parentNode = ShapeFactory.makeSphere(phoneData.size.d / 2 * SIZE_SCALE, Vector3.zero(), it)
+        MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.TRANSPARENT)).thenAccept {
+            val parentNode = ShapeFactory.makeSphere(phoneData.size.h / 2 * SIZE_SCALE, Vector3.zero(), it)
             parentNode.isShadowCaster = false
             renderable = parentNode
         }
@@ -65,8 +61,6 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             throw IllegalStateException("Scene is null!")
         }
 
-        
-      
       if (!::phoneActionsPopup.isInitialized) {
             phoneActionsPopup = Node()
             phoneActionsPopup.setParent(this)
@@ -80,7 +74,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
       
         if (!::upFace.isInitialized) {
             upFace = initializeBlackFace(phoneData.size.h * SIZE_SCALE / 2)
-
+        }
         
         if (!::downFace.isInitialized) {
             downFace = initializeBlackFace(-phoneData.size.h * SIZE_SCALE / 2)
@@ -103,7 +97,6 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         }
 
     }
-
 
     private fun initializeSideFace(fl: Float): TransformableNode {
         val sideNode = TransformableNode(transformationSystem)
