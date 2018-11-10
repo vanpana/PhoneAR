@@ -3,19 +3,18 @@ package com.cyberschnitzel.phonear
 import android.app.Activity
 import android.app.ActivityManager
 import android.content.Context
-import android.net.Uri
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.Log
-import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.Toast
 import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
+import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
@@ -58,7 +57,6 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
                     phoneDialog = null
                     attachNodeToAnchor(secondPhone!!, createAnchor(hitResult))
                 }
-
             }
         }
     }
