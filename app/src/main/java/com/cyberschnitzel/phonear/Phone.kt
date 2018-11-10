@@ -20,7 +20,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     private lateinit var menu: Node
 
     companion object {
-        private const val INFO_CARD_Y_POS_COEFF = 0.55f
+        private const val INFO_CARD_Y_POS_COEFF = 0.06f
     }
 
 
@@ -40,7 +40,8 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             menu = Node()
             menu.setParent(this)
             menu.isEnabled = false
-            menu.localPosition = Vector3(0.0f, 0.0f, 0.55f)
+            val offset = phoneData.size.h * INFO_CARD_Y_POS_COEFF + 1.0f
+            menu.localPosition = Vector3(0.0f, offset, 0.0f)
 
             ViewRenderable.builder()
                     .setView(context, R.layout.menu_phone_tap)
@@ -66,7 +67,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     }
 
     override fun onUpdate(p0: FrameTime?) {
-        if (!::menu.isInitialized) {
+        if (!::menu.isInitialized && menu.isEnabled) {
             return
         }
 
