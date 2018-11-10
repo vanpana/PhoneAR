@@ -34,8 +34,8 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
         if (!checkIsSupportedDeviceOrFinish(this)) {
             return
         }
-
         setContentView(R.layout.activity_ux)
+
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
 
         phoneDialog = PhoneDialog(applicationContext, arFragment!!.transformationSystem)
@@ -132,4 +132,5 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
 
         if (toSuper) super.onBackPressed()
     }
+
 }
