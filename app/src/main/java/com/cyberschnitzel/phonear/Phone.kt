@@ -289,6 +289,9 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
 
             val camera = view.findViewById(R.id.camera) as TextView
             camera.text = phoneData.camera
+
+            val weight = view.findViewById(R.id.weight) as TextView
+            weight.text = "Weight: " + phoneData.weight.toString()
         })
         canGoBack = true
     }
