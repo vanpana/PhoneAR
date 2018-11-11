@@ -1,10 +1,15 @@
 package com.cyberschnitzel.phonear
 
+import android.content.ContentValues
 import android.content.Context
+import android.net.Uri
+import android.util.Log
+import android.view.Gravity
 import android.view.MotionEvent
 import android.widget.TextView
 import android.view.View
 import android.widget.Button
+import android.widget.Toast
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.FrameTime
@@ -12,13 +17,12 @@ import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.rendering.*
-import com.google.ar.sceneform.rendering.Renderable
 import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
 import java.util.function.Consumer
 
 class Phone(private val context: Context, transformationSystem: TransformationSystem,
-            private val phoneData: PhoneData, phoneRenderable: ModelRenderable, private val comparable: Boolean = true)
+            private val phoneData: PhoneData, private val comparable: Boolean = true)
     : TransformableNode(transformationSystem), Node.OnTapListener {
 
     private lateinit var menu: Node
@@ -28,29 +32,20 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     private lateinit var leftFace: TransformableNode
     private lateinit var downFace: TransformableNode
     private lateinit var upFace: TransformableNode
-            
+
 
     private lateinit var phoneActionsPopup: Node
     private var canGoBack: Boolean = false
     var phoneDialog: PhoneDialog? = null
 
     companion object {
-        private const val INFO_CARD_Y_POS_COEFF = 0.06f
+        private const val INFO_CARD_Y_POS_COEFF = 0.05f
         private const val SIZE_SCALE = 0.01f
     }
 
 
     init {
         setOnTapListener(this)
-
-//        worldPosition = Vector3.add(worldPosition, up.scaled(phoneData.size.h * SIZE_SCALE / 2))
-        MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.TRANSPARENT)).thenAccept {
-            val parentNode = ShapeFactory.makeSphere(phoneData.size.h / 2 * SIZE_SCALE, Vector3.zero(), it)
-            parentNode.isShadowCaster = false
-            renderable = parentNode
-        }
-        localScale = Vector3.one()
-        worldScale = Vector3.one()
 
         scaleController.minScale = phoneData.minScale
         scaleController.maxScale = phoneData.minScale + 0.01f
@@ -61,41 +56,65 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             throw IllegalStateException("Scene is null!")
         }
 
-      if (!::phoneActionsPopup.isInitialized) {
+        if (!::phoneActionsPopup.isInitialized) {
             phoneActionsPopup = Node()
             phoneActionsPopup.setParent(this)
             phoneActionsPopup.isEnabled = false
             initMenuPopup()
         }
 
-      if (!::menu.isInitialized) {
+        if (!::menu.isInitialized) {
             initializeMenuNode()
         }
-      
-        if (!::upFace.isInitialized) {
-            upFace = initializeBlackFace(phoneData.size.h * SIZE_SCALE / 2)
-        }
-        
-        if (!::downFace.isInitialized) {
-            downFace = initializeBlackFace(-phoneData.size.h * SIZE_SCALE / 2)
-        }
 
-        if (!::frontFace.isInitialized) {
-            frontFace = initializeFrontFace()
-        }
+        if (phoneData.hasImages) {
+            MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.TRANSPARENT)).thenAccept {
+                val parentNode = ShapeFactory.makeSphere(phoneData.size.h / 2 * SIZE_SCALE, Vector3.zero(), it)
+                parentNode.isShadowCaster = false
+                renderable = parentNode
+            }
+            localScale = Vector3.one()
+            worldScale = Vector3.one()
 
-        if (!::backFace.isInitialized) {
-            backFace = initializeBackFace()
-        }
+            if (!::upFace.isInitialized) {
+                upFace = initializeBlackFace(phoneData.size.h * SIZE_SCALE / 2)
+            }
 
-        if (!::leftFace.isInitialized) {
-            leftFace = initializeSideFace(phoneData.size.w * SIZE_SCALE / 2)
-        }
+            if (!::downFace.isInitialized) {
+                downFace = initializeBlackFace(-phoneData.size.h * SIZE_SCALE / 2)
+            }
 
-        if (!::rightFace.isInitialized) {
-            rightFace = initializeSideFace(-phoneData.size.w * SIZE_SCALE / 2)
-        }
+            if (!::frontFace.isInitialized) {
+                frontFace = initializeFrontFace()
+            }
 
+            if (!::backFace.isInitialized) {
+                backFace = initializeBackFace()
+            }
+
+            if (!::leftFace.isInitialized) {
+                leftFace = initializeSideFace(phoneData.size.w * SIZE_SCALE / 2)
+            }
+
+            if (!::rightFace.isInitialized) {
+                rightFace = initializeSideFace(-phoneData.size.w * SIZE_SCALE / 2)
+            }
+        }
+        else {
+            ModelRenderable.builder()
+                    .setSource(context, Uri.parse("Phone_01.sfb"))
+                    .build()
+                    .thenAccept { model ->
+                        renderable = model
+                    }
+                    .exceptionally { throwable ->
+                        Log.d(ContentValues.TAG, throwable.localizedMessage)
+                        val toast = Toast.makeText(context, "Unable to load phone renderable", Toast.LENGTH_LONG)
+                        toast.setGravity(Gravity.CENTER, 0, 0)
+                        toast.show()
+                        return@exceptionally null
+                    }
+        }
     }
 
     private fun initializeSideFace(fl: Float): TransformableNode {
@@ -107,7 +126,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         sideNode.scaleController.isEnabled = false
 
         Texture.builder()
-                .setSource(context, context.resources.getIdentifier(phoneData.phoneName + "_side", "drawable", context.packageName))
+                .setSource(context, Uri.parse(phoneData.sideImage))
                 .build()
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)
@@ -130,7 +149,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         frontNode.scaleController.isEnabled = false
 
         Texture.builder()
-                .setSource(context, context.resources.getIdentifier(phoneData.phoneName + "_front", "drawable", context.packageName))
+                .setSource(context, Uri.parse(phoneData.frontImage))
                 .build()
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)
@@ -149,7 +168,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         backNode.rotationController.isEnabled = false
         backNode.scaleController.isEnabled = false
         Texture.builder()
-                .setSource(context, context.resources.getIdentifier(phoneData.phoneName + "_back", "drawable", context.packageName))
+                .setSource(context, Uri.parse(phoneData.backImage))
                 .build()
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)

@@ -10,14 +10,14 @@ import android.text.TextWatcher
 import android.util.Log
 import android.view.MotionEvent
 import android.widget.Toast
-import com.google.ar.core.Anchor
 import com.google.ar.core.HitResult
 import com.google.ar.core.Plane
 import com.google.ar.sceneform.AnchorNode
 import com.google.ar.sceneform.Node
-import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.ArFragment
 import com.google.ar.sceneform.ux.TransformableNode
+import com.google.gson.Gson
+import com.google.gson.reflect.TypeToken
 import kotlinx.android.synthetic.main.activity_ux.*
 
 class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
@@ -25,6 +25,7 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
     private var phoneDialog: PhoneDialog? = null
     private var firstPhone: Phone? = null // Main phone
     private var secondPhone: Phone? = null // Comparable phone
+    private lateinit var network: Network
 
     override// CompletableFuture requires api level 24
     // FutureReturnValueIgnored is not valid
@@ -35,6 +36,8 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
             return
         }
         setContentView(R.layout.activity_ux)
+
+        network = Network(this)
 
         arFragment = supportFragmentManager.findFragmentById(R.id.ux_fragment) as ArFragment?
 
@@ -119,8 +122,18 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
         override fun onTextChanged(p0: CharSequence?, p1: Int, p2: Int, p3: Int) {
             phoneDialog!!.updateText(p0.toString())
 
-            // TODO Make server request
-            phoneDialog!!.updateSuggestions(phoneDialog!!.fillSugestionsList())
+            // Make server request
+            network.getPhonesByQuery(p0.toString(), object:RequestHandler {
+                override fun onFailed(responseDto: ResponseDto) {
+                    Log.d("FAIL", responseDto.data)
+                }
+
+                override fun onSuccessful(responseDto: ResponseDto) {
+                    val phoneDataDtos: List<PhoneDataDTO> = Gson().fromJson(responseDto.data!!, object : TypeToken<List<PhoneDataDTO>>() {}.type)
+                    phoneDialog!!.updateSuggestions(phoneDataDtos.map { it.toPhoneData() }.toList())
+                }
+
+            })
         }
     }
 

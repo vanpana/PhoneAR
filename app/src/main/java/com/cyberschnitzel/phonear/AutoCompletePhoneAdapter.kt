@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.TextView
 
-class AutoCompletePhoneAdapter(var items : List<PhoneData>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+class AutoCompletePhoneAdapter(var items: List<PhoneData>, val context: Context) : RecyclerView.Adapter<ViewHolder>() {
+    var autoCompletePhoneSelected: AutoCompletePhoneSelected? = null
 
     override fun onCreateViewHolder(parent: ViewGroup, p1: Int): ViewHolder {
         return ViewHolder(LayoutInflater.from(context).inflate(R.layout.phone_autocomplete_item, parent, false))
@@ -17,7 +18,12 @@ class AutoCompletePhoneAdapter(var items : List<PhoneData>, val context: Context
     override fun onBindViewHolder(viewHolder: ViewHolder, pos: Int) {
         val phoneDataItem = items[pos]
 
+        loadImage(context, phoneDataItem.previewImage, viewHolder.imageView)
         viewHolder.name.text = phoneDataItem.phoneName
+
+        viewHolder.itemView.setOnClickListener {
+            autoCompletePhoneSelected?.onPhoneSelected(phoneDataItem)
+        }
     }
 
     // Gets the number of animals in the list
@@ -31,8 +37,8 @@ class AutoCompletePhoneAdapter(var items : List<PhoneData>, val context: Context
     }
 }
 
-class ViewHolder (view: View) : RecyclerView.ViewHolder(view) {
+class ViewHolder(view: View) : RecyclerView.ViewHolder(view) {
     // Holds the TextView that will add each animal to
-    val img = view.findViewById(R.id.image_view_flag) as ImageView
+    val imageView = view.findViewById(R.id.image_view_flag) as ImageView
     val name = view.findViewById(R.id.text_view_name) as TextView
 }

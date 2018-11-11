@@ -19,16 +19,13 @@ import com.google.ar.sceneform.math.Quaternion
 import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.rendering.ViewRenderable
-import com.google.ar.sceneform.ux.ScaleController
 import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
 import android.view.ViewGroup
 
 
-
 class PhoneDialog(context: Context, transformationSystem: TransformationSystem) :
-        TransformableNode(transformationSystem), InputChangedTrigger {
-
+        TransformableNode(transformationSystem), InputChangedTrigger, AutoCompletePhoneSelected {
     private var transitionsContainer: ViewGroup? = null
 
     lateinit var inputRenderable: ViewRenderable
@@ -37,10 +34,11 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     private var phoneAdapter: AutoCompletePhoneAdapter? = null
     lateinit var phoneSelectedTrigger: PhoneSelectedTrigger
     var suggestionListRecyclerView: RecyclerView? = null
+    var canUpdateItems: Boolean = true
+    var selectedPhoneData: PhoneData? = null
 
 
     init {
-        fillSugestionsList()
         ViewRenderable.builder()
                 .setView(context, R.layout.dialog_phone_searcher)
                 .build()
@@ -59,10 +57,10 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     val actionButton = transitionsContainer!!.findViewById(R.id.action_button) as Button
                     actionButton.setOnClickListener(onShowPhoneClickListener)
 
-                    // TODO delete this dummy
                     suggestionListRecyclerView = transitionsContainer!!.findViewById(R.id.suggestion_list) as RecyclerView
                     suggestionListRecyclerView!!.layoutManager = LinearLayoutManager(context)
-                    phoneAdapter = AutoCompletePhoneAdapter(fillSugestionsList(), context)
+                    phoneAdapter = AutoCompletePhoneAdapter(mutableListOf(), context)
+                    phoneAdapter!!.autoCompletePhoneSelected = this
                     suggestionListRecyclerView!!.adapter = phoneAdapter
                     suggestionListRecyclerView!!.visibility = View.GONE
 
@@ -86,6 +84,13 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
             parentPhoneNameInput.requestFocusFromTouch()
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).showSoftInput(parentPhoneNameInput, 0)
 
+            parentPhoneNameInput.setOnFocusChangeListener { _, hasFocus ->
+                if (!hasFocus) {
+                    (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(parentPhoneNameInput.windowToken, 0)
+                }
+            }
+
+            canUpdateItems = true
         }
     }
 
@@ -93,25 +98,20 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
         if (phoneNameInput.text.toString() != "") {
             (context.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager).hideSoftInputFromWindow(parentPhoneNameInput.windowToken, 0)
 
-            // Find the phone and build it
-            ModelRenderable.builder()
-                    .setSource(context, Uri.parse("Phone_01.sfb"))
-                    .build()
-                    .thenAccept { model ->
-                        val phone = Phone(context, transformationSystem,
-                                PhoneData("samsung_note_9", Size(70.0f, 143.0f, 7.7f),
-                                        "android", "snapdragon", "12mp"),
-                                model)
-                        phoneSelectedTrigger.onPhoneSelected(phone)
-                        phoneNameInput.setText("")
-                    }
-                    .exceptionally { throwable ->
-                        Log.d(TAG, throwable.localizedMessage)
-                        val toast = Toast.makeText(context, "Unable to load andy renderable", Toast.LENGTH_LONG)
-                        toast.setGravity(Gravity.CENTER, 0, 0)
-                        toast.show()
-                        return@exceptionally null
-                    }
+            val phoneData: PhoneData
+            if (selectedPhoneData == null) {
+                phoneData = PhoneData("samsung_note_9", Size(70.0f, 143.6f, 7.7f),
+                        10.0f,
+                        "android", "snapdragon", "12mp")
+            } else {
+                phoneData = selectedPhoneData!!
+            }
+
+            val phone = Phone(context, transformationSystem, phoneData)
+            phoneSelectedTrigger.onPhoneSelected(phone)
+
+            parentPhoneNameInput.setText("")
+            phoneAdapter!!.updateItems(listOf())
         }
 
     }
@@ -136,25 +136,23 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
         worldRotation = lookRotation
     }
 
+    fun updateSuggestions(items: List<PhoneData>) {
+        if (canUpdateItems) {
+            if (suggestionListRecyclerView!!.visibility == View.GONE) {
+                TransitionManager.beginDelayedTransition(transitionsContainer)
+                suggestionListRecyclerView!!.visibility = View.VISIBLE
+            }
 
-    fun fillSugestionsList(): List<PhoneData> {
-        return listOf(
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp"),
-                PhoneData("Iphone X", Size(1f, 2f, 3f), "ios", "Bionic 12", "12mp")
-        )
+            phoneAdapter!!.updateItems(items)
+        } else {
+            suggestionListRecyclerView!!.visibility = View.GONE
+        }
     }
 
-    fun updateSuggestions(items: List<PhoneData>) {
-        if (suggestionListRecyclerView!!.visibility == View.GONE) {
-            TransitionManager.beginDelayedTransition(transitionsContainer)
-            suggestionListRecyclerView!!.visibility = View.VISIBLE
-        }
-
-        phoneAdapter!!.updateItems(items)
+    override fun onPhoneSelected(phoneData: PhoneData) {
+        canUpdateItems = false
+        parentPhoneNameInput.setText(phoneData.phoneName)
+        selectedPhoneData = phoneData
+        updateSuggestions(listOf())
     }
 }
