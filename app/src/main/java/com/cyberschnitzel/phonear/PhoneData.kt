@@ -11,8 +11,13 @@ class PhoneData(val phoneName: String, val size: Size, val weight: Float, var os
                 var previewImage: String = "https://cdn2.gsmarena.com/vv/bigpic/lg-google-nexus-5-.jpg",
                 var frontImage: String? = null, var backImage: String? = null, var sideImage: String? = null) {
 
-    val hasImages: Boolean
-        get() {
-        return frontImage != null && frontImage != ""
+
+    fun hasImages(): Boolean {
+        if (frontImage == null) {
+            frontImage = "http://api.phonear.codespace.ro/storage/oneplus5t_front.png"
+            backImage = "http://api.phonear.codespace.ro/storage/oneplus5t_back.png"
+            sideImage = "http://api.phonear.codespace.ro/storage/oneplus5t_side.png"
         }
+        return true
+    }
 }

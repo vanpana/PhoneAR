@@ -63,14 +63,18 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
             initializeMenuNode()
         }
 
-        if (phoneData.hasImages) {
+        if (phoneData.hasImages()) {
             MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.TRANSPARENT)).thenAccept {
-                val parentNode = ShapeFactory.makeCube(phoneData.size.vec3().scaled(SIZE_SCALE - 0.0001f), Vector3.zero(), it)
+                it.setFloat("metallicness", 0f);
+                it.setFloat("roughness", 0f);
+                it.setFloat("reflectance", 0f)
+                val parentNode = ShapeFactory.makeCube(phoneData.size.vec3().scaled(SIZE_SCALE + 0.0001f), Vector3.zero(), it)
                 parentNode.isShadowCaster = false
                 renderable = parentNode
             }
             localScale = Vector3.one()
             worldScale = Vector3.one()
+            scaleController.isEnabled = false
 
             if (!::upFace.isInitialized) {
                 upFace = initializeBlackFace(phoneData.size.h * SIZE_SCALE / 2)
@@ -98,6 +102,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                     .build()
                     .thenAccept { model ->
                         renderable = model
+                        worldScale.set(Vector3.one().scaled(SIZE_SCALE))
                     }
                     .exceptionally { throwable ->
                         Log.d(ContentValues.TAG, throwable.localizedMessage)
@@ -170,6 +175,10 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                                 backNode.renderable.isShadowCaster = false
                             }
                 }
+                .exceptionally {
+                    it.printStackTrace()
+                    return@exceptionally null;
+                }
         return backNode
     }
 
@@ -220,7 +229,9 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     }
 
     private val handsModeButtonClick = View.OnClickListener {
-
+        val quaternion = Quaternion(localRotation)
+        val axis = Quaternion.axisAngle(right, -90f)
+        this.localRotation = Quaternion.multiply(quaternion, axis)
     }
 
     private fun initPopup(layout: Int, then: Consumer<ViewRenderable>) {
