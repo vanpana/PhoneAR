@@ -106,8 +106,8 @@ class HelloSceneformActivity : AppCompatActivity(), PhoneSelectedTrigger {
             // phoneDialog = null // TODO don't make null maybe
         } else if (secondPhone == null) {
             secondPhone = phone
-
-            //TODO Make sure the menu doesn't show comparable
+            secondPhone!!.comparable = false
+            onBackPressed()
         }
     }
 

@@ -22,7 +22,7 @@ import com.google.ar.sceneform.ux.TransformationSystem
 import java.util.function.Consumer
 
 class Phone(private val context: Context, transformationSystem: TransformationSystem,
-            private val phoneData: PhoneData, private val comparable: Boolean = true)
+            private val phoneData: PhoneData, var comparable: Boolean = true)
     : TransformableNode(transformationSystem), Node.OnTapListener {
 
     private lateinit var menu: Node
@@ -38,7 +38,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     var phoneDialog: PhoneDialog? = null
 
     companion object {
-        private const val INFO_CARD_Y_POS_COEFF = 0.06f
+        private const val INFO_CARD_Y_POS_COEFF = 0.0015f
         private const val SIZE_SCALE = 0.002f
     }
 
@@ -60,7 +60,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         }
 
         if (!::menu.isInitialized) {
-            initializeMenuNode()
+            initMenuPopup()
         }
 
         if (phoneData.hasImages()) {
@@ -235,7 +235,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     }
 
     private fun initPopup(layout: Int, then: Consumer<ViewRenderable>) {
-        val dimension = phoneData.size.h * INFO_CARD_Y_POS_COEFF + 1.0f
+        val dimension = phoneData.size.h * INFO_CARD_Y_POS_COEFF
         phoneActionsPopup.localPosition = Vector3(0.0f, dimension, 0.0f)
         phoneActionsPopup.localScale = Vector3(dimension, dimension, dimension)
 
