@@ -36,6 +36,7 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
     var suggestionListRecyclerView: RecyclerView? = null
     var canUpdateItems: Boolean = true
     var selectedPhoneData: PhoneData? = null
+    var actionButton: Button? = null
 
 
     init {
@@ -54,8 +55,8 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
                     phoneNameInput.setOnClickListener(phoneNameInputClickListener)
 
                     // Set the button
-                    val actionButton = transitionsContainer!!.findViewById(R.id.action_button) as Button
-                    actionButton.setOnClickListener(onShowPhoneClickListener)
+                    actionButton = transitionsContainer!!.findViewById(R.id.action_button) as Button
+                    actionButton!!.setOnClickListener(onShowPhoneClickListener)
 
                     suggestionListRecyclerView = transitionsContainer!!.findViewById(R.id.suggestion_list) as RecyclerView
                     suggestionListRecyclerView!!.layoutManager = LinearLayoutManager(context)
@@ -153,6 +154,7 @@ class PhoneDialog(context: Context, transformationSystem: TransformationSystem) 
         canUpdateItems = false
         parentPhoneNameInput.setText(phoneData.phoneName)
         selectedPhoneData = phoneData
+        actionButton!!.performClick()
         updateSuggestions(listOf())
     }
 }

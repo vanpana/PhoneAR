@@ -4,7 +4,10 @@
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     xmlns:app="http://schemas.android.com/apk/res-auto"
-app:cardBackgroundColor="#7319b5fe"
+    app:cardBackgroundColor="#7319b5fe"
+    android:clickable="true"
+    android:focusable="true"
+    android:foreground="?android:selectableItemBackground"
     app:cardCornerRadius="20dp">
 
     <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"

@@ -6,17 +6,17 @@ import android.net.Uri
 import android.util.Log
 import android.view.Gravity
 import android.view.MotionEvent
-import android.widget.TextView
 import android.view.View
 import android.widget.Button
+import android.widget.TextView
 import android.widget.Toast
-import com.google.ar.sceneform.rendering.ModelRenderable
-import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.FrameTime
 import com.google.ar.sceneform.HitTestResult
 import com.google.ar.sceneform.Node
 import com.google.ar.sceneform.math.Quaternion
+import com.google.ar.sceneform.math.Vector3
 import com.google.ar.sceneform.rendering.*
+import com.google.ar.sceneform.rendering.ModelRenderable
 import com.google.ar.sceneform.ux.TransformableNode
 import com.google.ar.sceneform.ux.TransformationSystem
 import java.util.function.Consumer
@@ -28,8 +28,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     private lateinit var menu: Node
     private lateinit var frontFace: TransformableNode
     private lateinit var backFace: TransformableNode
-    private lateinit var rightFace: TransformableNode
-    private lateinit var leftFace: TransformableNode
+    private lateinit var sideFace: TransformableNode
     private lateinit var downFace: TransformableNode
     private lateinit var upFace: TransformableNode
 
@@ -39,16 +38,13 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
     var phoneDialog: PhoneDialog? = null
 
     companion object {
-        private const val INFO_CARD_Y_POS_COEFF = 0.05f
-        private const val SIZE_SCALE = 0.01f
+        private const val INFO_CARD_Y_POS_COEFF = 0.06f
+        private const val SIZE_SCALE = 0.002f
     }
 
 
     init {
         setOnTapListener(this)
-
-        scaleController.minScale = phoneData.minScale
-        scaleController.maxScale = phoneData.minScale + 0.01f
     }
 
     override fun onActivate() {
@@ -69,7 +65,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
 
         if (phoneData.hasImages) {
             MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.TRANSPARENT)).thenAccept {
-                val parentNode = ShapeFactory.makeSphere(phoneData.size.h / 2 * SIZE_SCALE, Vector3.zero(), it)
+                val parentNode = ShapeFactory.makeCube(phoneData.size.vec3().scaled(SIZE_SCALE - 0.0001f), Vector3.zero(), it)
                 parentNode.isShadowCaster = false
                 renderable = parentNode
             }
@@ -92,12 +88,8 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                 backFace = initializeBackFace()
             }
 
-            if (!::leftFace.isInitialized) {
-                leftFace = initializeSideFace(phoneData.size.w * SIZE_SCALE / 2)
-            }
-
-            if (!::rightFace.isInitialized) {
-                rightFace = initializeSideFace(-phoneData.size.w * SIZE_SCALE / 2)
+            if (!::sideFace.isInitialized) {
+                sideFace = initializeSideFace()
             }
         }
         else {
@@ -117,10 +109,10 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         }
     }
 
-    private fun initializeSideFace(fl: Float): TransformableNode {
+    private fun initializeSideFace(): TransformableNode {
         val sideNode = TransformableNode(transformationSystem)
         sideNode.setParent(this)
-        sideNode.localPosition = left.scaled(fl)
+        sideNode.localPosition = Vector3.zero()
         sideNode.translationController.isEnabled = false
         sideNode.rotationController.isEnabled = false
         sideNode.scaleController.isEnabled = false
@@ -131,7 +123,7 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)
                             .thenAccept { material ->
-                                sideNode.renderable = ShapeFactory.makeCube(Vector3(0.02f, phoneData.size.h * SIZE_SCALE, phoneData.size.d * SIZE_SCALE), Vector3.zero(), material)
+                                sideNode.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, phoneData.size.h * SIZE_SCALE * 0.999f, phoneData.size.d * SIZE_SCALE * 0.999f), Vector3.zero(), material)
                             }
                 }
 
@@ -154,7 +146,8 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)
                             .thenAccept { material ->
-                                frontNode.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, phoneData.size.h * SIZE_SCALE, 0.01f), Vector3.zero(), material)
+                                frontNode.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, phoneData.size.h * SIZE_SCALE, 0.001f), Vector3.zero(), material)
+                                frontNode.renderable.isShadowCaster = false
                             }
                 }
         return frontNode
@@ -173,7 +166,8 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
                 .thenAccept { texture ->
                     MaterialFactory.makeOpaqueWithTexture(context, texture)
                             .thenAccept { material ->
-                                backNode.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, phoneData.size.h * SIZE_SCALE, 0.01f), Vector3.zero(), material)
+                                backNode.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, phoneData.size.h * SIZE_SCALE, 0.001f), Vector3.zero(), material)
+                                backNode.renderable.isShadowCaster = false
                             }
                 }
         return backNode
@@ -186,14 +180,10 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         node.localPosition = up.scaled(h)
 
         MaterialFactory.makeOpaqueWithColor(context, Color(android.graphics.Color.BLACK))
-                .thenAccept { node.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, 0.01f, phoneData.size.d * SIZE_SCALE), Vector3.zero(), it) }
-
-        val trackSphere = TransformableNode(transformationSystem)
-        trackSphere.setParent(node)
-        trackSphere.localPosition = Vector3.zero()
-        MaterialFactory.makeTransparentWithColor(context, Color(android.graphics.Color.BLUE)).thenAccept {
-            trackSphere.renderable = ShapeFactory.makeSphere(0.1f, Vector3.zero(), it)
-        }
+                .thenAccept {
+                    node.renderable = ShapeFactory.makeCube(Vector3(phoneData.size.w * SIZE_SCALE, 0.001f, phoneData.size.d * SIZE_SCALE), Vector3.zero(), it)
+                    node.renderable.isShadowCaster = false
+                }
 
 
         return node
@@ -203,9 +193,9 @@ class Phone(private val context: Context, transformationSystem: TransformationSy
         menu = Node()
         menu.setParent(this)
         menu.isEnabled = false
-        val dimension = phoneData.size.h * INFO_CARD_Y_POS_COEFF + 1.0f
-        menu.localPosition = Vector3(0.0f, dimension, 0.0f)
-        menu.localScale = Vector3(dimension, dimension, dimension)
+        val dimension = phoneData.size.h * SIZE_SCALE + 0.5f
+        menu.localPosition = up.scaled(dimension)
+        menu.localScale = Vector3.one()
 
         ViewRenderable.builder()
                 .setView(context, R.layout.menu_phone_tap)
